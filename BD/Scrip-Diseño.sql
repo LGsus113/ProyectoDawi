@@ -138,12 +138,12 @@ CREATE PROCEDURE sp_listar_productos(
 BEGIN
     IF p_disponibles = 1 THEN
         -- Listar disponibles
-        SELECT id_producto, nombre, descripcion, precio, stock
+        SELECT id_producto, nombre, descripcion, precio, stock, estado
         FROM Productos
         WHERE estado = 1 AND stock > 0;
     ELSE
         -- Listar no disponibles o inactivos
-        SELECT id_producto, nombre, descripcion, precio, stock
+        SELECT id_producto, nombre, descripcion, precio, stock, estado
         FROM Productos
         WHERE estado = 0 OR stock = 0;
     END IF;
