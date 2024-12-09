@@ -29,4 +29,12 @@ public class Producto {
 
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean estado = true;
+
+    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, Boolean estado) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.stock = stock;
+        this.estado = estado;
+    }
 }

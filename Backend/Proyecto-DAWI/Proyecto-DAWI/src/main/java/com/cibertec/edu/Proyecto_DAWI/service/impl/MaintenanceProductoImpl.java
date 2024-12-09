@@ -1,6 +1,8 @@
 package com.cibertec.edu.Proyecto_DAWI.service.impl;
 
-import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.UpdateDetailProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.entity.Producto;
 import com.cibertec.edu.Proyecto_DAWI.repository.ProductoRepository;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
@@ -10,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -37,4 +41,49 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
 
         return productos;
     }
+
+    @Override
+    public void createProducto(CreateProductoDto createProducto) {
+        Producto p = new Producto(
+                createProducto.nombre(),
+                createProducto.descripcion(),
+                createProducto.precio(),
+                createProducto.stock(),
+                true
+        );
+
+        productoRepository.save(p);
+    }
+
+    @Override
+    public Boolean updateProducto(UpdateDetailProductoDto updateProducto) {
+        Optional<Producto> optional = productoRepository.findById(updateProducto.idProducto());
+
+        return optional.map(
+                producto -> {
+                    producto.setNombre(updateProducto.nombre());
+                    producto.setDescripcion(updateProducto.descripcion());
+                    producto.setPrecio(updateProducto.precio());
+
+                    productoRepository.save(producto);
+                    return true;
+                }
+        ).orElse(false);
+    }
+
+    @Override
+    public Boolean deshabilitarProductos(Integer idProducto) {
+        List<Map<String, Object>> resultado = productoRepository.sp_deshabilitar_producto(idProducto);
+
+        if (resultado != null && !resultado.isEmpty()) {
+            Object resultadoValor = resultado.get(0).get("resultado");
+
+            if (resultadoValor instanceof Integer) {
+                return (Integer) resultadoValor == 1;
+            }
+        }
+
+        return false;
+    }
+
 }

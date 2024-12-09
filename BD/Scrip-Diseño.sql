@@ -152,14 +152,38 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE sp_deshabilitar_producto(
-	IN p_id_prod INT
+    IN p_id_prod INT
 )
 BEGIN
-    UPDATE Productos
-    SET estado = 0
+    DECLARE resultado INT;
+    DECLARE estado_actual INT;
+
+    -- Verifica el estado actual del producto
+    SELECT estado INTO estado_actual
+    FROM Productos
     WHERE id_producto = p_id_prod;
+
+    -- Si el estado ya está en 0, no se hace nada
+    IF estado_actual != 0 THEN
+        UPDATE Productos
+        SET estado = 0
+        WHERE id_producto = p_id_prod;
+        
+        -- Verifica si la actualización afectó alguna fila
+        IF ROW_COUNT() > 0 THEN
+            SET resultado = 1; -- Éxito
+        ELSE
+            SET resultado = 0; -- No hubo actualización (producto ya estaba deshabilitado)
+        END IF;
+    ELSE
+        SET resultado = 0; -- Producto ya está deshabilitado
+    END IF;
+    
+    -- Retorna el resultado
+    SELECT resultado;
 END$$
 DELIMITER ;
+
 
 
 -- Triggers basicos
