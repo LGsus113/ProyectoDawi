@@ -35,11 +35,8 @@ select * from Detalle_Compra;
 CALL sp_registrar_compra(
 	1, -- ID usurio
     '1234567890123456', -- Tarjeta
-    '[{"id_prod":1,"cantidad":2,"precio_unitario":750.00},{"id_prod":3,"cantidad":1,"precio_unitario":300.00}]', -- JSON de detalle de compra
-    @id_compra,
-    @total
+    '[{"id_prod":1,"cantidad":2,"precio_unitario":750.00},{"id_prod":3,"cantidad":1,"precio_unitario":300.00}]' -- JSON de detalle de compra
 );
-SELECT @id_compra AS id_compra, @total AS total; -- Validación de resultado
 
 CALL sp_listar_productos(1);-- Disponible = 1, No disponible = 0
 
@@ -49,4 +46,4 @@ CALL sp_autenticar_usuario(
 );
 
 CALL sp_deshabilitar_producto(4);
-CALL sp_habilitar_producto(4);
+CALL sp_habilitar_producto(2);

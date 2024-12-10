@@ -73,9 +73,7 @@ DELIMITER $$
 CREATE PROCEDURE sp_registrar_compra(
     IN p_id_usu INT,
     IN p_tarjeta VARCHAR(16),
-    IN p_detalle JSON, -- JSON con los detalles de la compra
-    OUT p_id_compra INT, -- Devuelve el ID de la compra creada
-    OUT p_total DECIMAL(10, 2) -- Devuelve el total de la compra
+    IN p_detalle JSON -- JSON con los detalles de la compra
 )
 BEGIN
     DECLARE v_id_compra INT;
@@ -86,11 +84,21 @@ BEGIN
     DECLARE v_id_prod INT;
     DECLARE v_length INT;
 
-    -- Manejo de errores
-    DECLARE exit HANDLER FOR SQLEXCEPTION
+    -- Variable para manejo de errores
+    DECLARE v_error_message TEXT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        -- Capturar información del error
+        GET DIAGNOSTICS CONDITION 1 
+            v_error_message = MESSAGE_TEXT;
+
+        -- Rollback de la transacción
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error al registrar la compra';
+
+        -- Generar un error genérico para el cliente
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = v_error_message;
     END;
 
     START TRANSACTION;
@@ -123,13 +131,10 @@ BEGIN
     -- Actualizar el total de la compra en la tabla Compras
     UPDATE Compras SET total = v_total WHERE id_compra = v_id_compra;
 
-    -- Asignar valores de salida
-    SET p_id_compra = v_id_compra;
-    SET p_total = v_total;
-
     COMMIT;
 END$$
 DELIMITER ;
+
 
 DELIMITER $$
 CREATE PROCEDURE sp_listar_productos(
