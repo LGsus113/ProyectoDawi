@@ -156,29 +156,35 @@ CREATE PROCEDURE sp_deshabilitar_producto(
 )
 BEGIN
     DECLARE resultado INT;
-    DECLARE estado_actual INT;
 
-    -- Verifica el estado actual del producto
-    SELECT estado INTO estado_actual
-    FROM Productos
-    WHERE id_producto = p_id_prod;
+    -- Intenta actualizar el producto
+    UPDATE Productos
+    SET estado = 0
+    WHERE id_producto = p_id_prod AND estado != 0;
 
-    -- Si el estado ya está en 0, no se hace nada
-    IF estado_actual != 0 THEN
-        UPDATE Productos
-        SET estado = 0
-        WHERE id_producto = p_id_prod;
-        
-        -- Verifica si la actualización afectó alguna fila
-        IF ROW_COUNT() > 0 THEN
-            SET resultado = 1; -- Éxito
-        ELSE
-            SET resultado = 0; -- No hubo actualización (producto ya estaba deshabilitado)
-        END IF;
-    ELSE
-        SET resultado = 0; -- Producto ya está deshabilitado
-    END IF;
-    
+    -- Verifica si la actualización afectó alguna fila
+    SET resultado = ROW_COUNT();
+
+    -- Retorna el resultado
+    SELECT resultado;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE sp_habilitar_producto(
+    IN p_id_prod INT
+)
+BEGIN
+    DECLARE resultado INT;
+
+    -- Intenta actualizar el producto
+    UPDATE Productos
+    SET estado = 1
+    WHERE id_producto = p_id_prod AND estado != 1;
+
+    -- Verifica si la actualización afectó alguna fila
+    SET resultado = ROW_COUNT();
+
     -- Retorna el resultado
     SELECT resultado;
 END$$

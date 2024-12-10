@@ -41,7 +41,7 @@ CALL sp_registrar_compra(
 );
 SELECT @id_compra AS id_compra, @total AS total; -- Validación de resultado
 
-CALL sp_listar_productos(0);-- Disponible = 1, No disponible = 0
+CALL sp_listar_productos(1);-- Disponible = 1, No disponible = 0
 
 CALL sp_autenticar_usuario(
 	'maria.rodriguez@example.com',
@@ -49,3 +49,4 @@ CALL sp_autenticar_usuario(
 );
 
 CALL sp_deshabilitar_producto(4);
+CALL sp_habilitar_producto(4);

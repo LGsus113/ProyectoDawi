@@ -2,6 +2,7 @@ package com.cibertec.edu.Proyecto_DAWI.service.impl;
 
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.StockProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.UpdateDetailProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.entity.Producto;
 import com.cibertec.edu.Proyecto_DAWI.repository.ProductoRepository;
@@ -69,6 +70,35 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
                     return true;
                 }
         ).orElse(false);
+    }
+
+    @Override
+    public Boolean updateStockProducto(StockProductoDto stockProductoDto) {
+        Optional<Producto> optional = productoRepository.findById(stockProductoDto.idProducto());
+
+        return optional.map(
+                producto -> {
+                    producto.setStock(stockProductoDto.stock());
+
+                    productoRepository.save(producto);
+                    return true;
+                }
+        ).orElse(false);
+    }
+
+    @Override
+    public Boolean habilitarProductos(Integer idProducto) {
+        List<Map<String, Object>> resultado = productoRepository.sp_habilitar_producto(idProducto);
+
+        if (resultado != null && !resultado.isEmpty()) {
+            Object resultadoValor = resultado.get(0).get("resultado");
+
+            if (resultadoValor instanceof Integer) {
+                return (Integer) resultadoValor == 1;
+            }
+        }
+
+        return false;
     }
 
     @Override

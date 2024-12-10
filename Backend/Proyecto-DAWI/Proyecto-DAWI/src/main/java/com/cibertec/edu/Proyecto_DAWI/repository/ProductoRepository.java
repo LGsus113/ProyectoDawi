@@ -19,8 +19,17 @@ public interface ProductoRepository extends CrudRepository<Producto, Integer> {
     );
 
     @CacheEvict(value = "productos", allEntries = true)
+    @Query(value = "CALL sp_habilitar_producto(:p_id_prod)", nativeQuery = true)
+    List<Map<String, Object>> sp_habilitar_producto(
+            @Param("p_id_prod") Integer idProducto
+    );
+
+    @CacheEvict(value = "productos", allEntries = true)
     @Query(value = "CALL sp_deshabilitar_producto(:p_id_prod)", nativeQuery = true)
     List<Map<String, Object>> sp_deshabilitar_producto(
             @Param("p_id_prod") Integer idProducto
     );
+
+    @CacheEvict(value = "productos", allEntries = true)
+    Producto save(Producto p);
 }
