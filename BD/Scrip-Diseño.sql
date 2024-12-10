@@ -135,7 +135,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-
 DELIMITER $$
 CREATE PROCEDURE sp_listar_productos(
     IN p_disponibles TINYINT -- 1: Disponibles, 0: Inactivos
