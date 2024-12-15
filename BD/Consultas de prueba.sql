@@ -3,11 +3,11 @@ USE ProyectoSpring;
 -- Insersion de Usurios ficticios
 INSERT INTO Usuarios (nombre, email, contrasena, rol, estado) 
 VALUES
-	('Juan Pérez', 'juan.perez@example.com', 'password123', 'Usuario', 1),
-	('Ana García', 'ana.garcia@example.com', 'password456', 'Usuario', 1),
-	('Carlos López', 'carlos.lopez@example.com', 'password789', 'Admin', 1),
-	('María Rodríguez', 'maria.rodriguez@example.com', 'password000', 'Usuario', 1),
-	('Luisa Martínez', 'luisa.martinez@example.com', 'password321', 'Usuario', 1);
+	('Juan Pérez', 'juan.perez@example.com', '$2a$10$2aow1GFZY5hJUz9D5DUIMOl9GXe5EeQKYzZaUv6yIrcZrG2F6xSyu', 'Usuario', 1), -- contrasena: password123
+	('Ana García', 'ana.garcia@example.com', '$2a$10$5Xfo7PtVejyf5wdSU6AXSOG82KQXTYq19rZPTQKIGs/uxY7TwFy0y', 'Usuario', 1), -- contrasena: password456
+	('Carlos López', 'carlos.lopez@example.com', '$2a$10$jWfKh/1yTNPgFi5NcV7o0ee7Kxws/miHCRbBRv25oN5uZV1bk2i4u', 'Admin', 1), -- contrasena: password789
+	('María Rodríguez', 'maria.rodriguez@example.com', '$2a$10$l8T4T87Sc5b4iQzvjo8t5OIqdRJePEwwJ7De8HJQ31iQunbyNzFZG', 'Usuario', 1), -- contrasena: password000
+	('Luisa Martínez', 'luisa.martinez@example.com', '$2a$10$LsBth9F4CLqmSupCY/09w.rh9hx.5OjDdupXTOPKYPlDF5TW/Vsu6', 'Usuario', 1); -- contrasena: password321
 
 
 -- Insersion de productos perifericos y tecnología
@@ -45,5 +45,5 @@ CALL sp_autenticar_usuario(
     'password000'
 );
 
-CALL sp_deshabilitar_producto(4);
+CALL sp_deshabilitar_producto(1);
 CALL sp_habilitar_producto(2);

@@ -13,4 +13,6 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
             @Param("p_email") String email,
             @Param("p_contrasena") String password
     );
+
+    Optional<Usuario> findByEmail(String email);
 }
