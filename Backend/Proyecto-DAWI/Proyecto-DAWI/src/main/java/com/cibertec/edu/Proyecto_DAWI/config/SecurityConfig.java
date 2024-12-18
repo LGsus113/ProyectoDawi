@@ -1,5 +1,6 @@
 package com.cibertec.edu.Proyecto_DAWI.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,13 +12,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Autowired
+    CustomHandlerSuccess customHandlerSuccess;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/start/login").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/start/products-all").hasAnyRole("Admin", "Usuario")
+                        .requestMatchers("/start/products-all").hasAnyRole("Admin")
+                        .requestMatchers("/start/home").hasAnyRole("Usuario")
                         .requestMatchers("/start/add").hasAnyRole("Admin")
                         .requestMatchers("/start/update").hasAnyRole("Admin")
                         .anyRequest().authenticated()
@@ -31,7 +36,7 @@ public class SecurityConfig {
 
                 .formLogin(form -> form
                         .loginPage("/start/login")
-                        .defaultSuccessUrl("/start/products-all", false)
+                        .successHandler(customHandlerSuccess)
                         .permitAll()
                 )
 

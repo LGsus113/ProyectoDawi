@@ -70,6 +70,24 @@ public class ProductoTController {
         return "fragments/productos :: productosTable"; //acá devolveremos solo un pedazo de hmtl, nos servirá para modificar la tabla de productos
     }
 
+    @GetMapping("/home")
+    public String home(Model model) {
+        try {
+            List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
+            model.addAttribute("productos", productos);
+            model.addAttribute("error", null);
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al traer los datos: " + e.getMessage());
+        }
+
+        return "Home";
+    }
+
+    @GetMapping("/car-to-shop")
+    public String car(Model model) {
+        return "Car";
+    }
+
     @GetMapping("/add")
     public String add() {
         return "Nuevo-Producto";
@@ -105,16 +123,16 @@ public class ProductoTController {
         try {
             Boolean updated = maintenanceProducto.updateProducto(updateProducto);
 
-            if (updated) {
+            if (Boolean.TRUE.equals(updated)) {
                 return "redirect:/start/products-all";
-            } else {
-                model.addAttribute("error", "No se pudo actualizar el producto.");
-                return "ActualizarProducto";
             }
+
+            model.addAttribute("error", "No se pudo actualizar el producto.");
         } catch (Exception e) {
             model.addAttribute("error", "Error al actualizar el producto: " + e.getMessage());
-            return "ActualizarProducto";
         }
+
+        return "ActualizarProducto";
     }
 
     @PutMapping("/update-stock")
