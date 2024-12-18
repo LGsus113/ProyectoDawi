@@ -18,6 +18,8 @@ public class SecurityConfig {
                         .requestMatchers("/start/login").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/start/products-all").hasAnyRole("Admin", "Usuario")
+                        .requestMatchers("/start/add").hasAnyRole("Admin")
+                        .requestMatchers("/start/update").hasAnyRole("Admin")
                         .anyRequest().authenticated()
                 )
 

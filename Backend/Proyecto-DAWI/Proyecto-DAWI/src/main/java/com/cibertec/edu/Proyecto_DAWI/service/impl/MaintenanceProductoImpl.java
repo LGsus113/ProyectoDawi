@@ -8,6 +8,9 @@ import com.cibertec.edu.Proyecto_DAWI.entity.Producto;
 import com.cibertec.edu.Proyecto_DAWI.repository.ProductoRepository;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,31 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
         });
 
         return productos;
+    }
+
+    @Override
+    public Page<ProductoDto> productosPorDisponibilidadPaginado(boolean disponibilidad, int page, int size) {
+        List<ProductoDto> productos = new ArrayList<ProductoDto>();
+        Iterable<Producto> iterable = productoRepository.sp_listar_productos(disponibilidad);
+
+        iterable.forEach(producto -> {
+            ProductoDto productoDto = new ProductoDto(
+                    producto.getIdProducto(),
+                    producto.getNombre(),
+                    producto.getDescripcion(),
+                    producto.getPrecio(),
+                    producto.getStock(),
+                    producto.getEstado()
+            );
+
+            productos.add(productoDto);
+        });
+
+        int start = Math.min(page * size, productos.size());
+        int end = Math.min((page + 1) * size, productos.size());
+        List<ProductoDto> pagedProductos = productos.subList(start, end);
+
+        return new PageImpl<>(pagedProductos, PageRequest.of(page, size), productos.size());
     }
 
     @Override
@@ -115,5 +143,4 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
 
         return false;
     }
-
 }

@@ -6,7 +6,6 @@ public record CreateProductoDto(
         String nombre,
         String descripcion,
         BigDecimal precio,
-        Integer stock,
-        Boolean estado
+        Integer stock
 ) {
 }
