@@ -1,17 +1,25 @@
 package com.cibertec.edu.Proyecto_DAWI.TemplatesController;
 
+import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraRequestDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.StockProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.UpdateDetailProductoDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.UsuarioDto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
+import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -19,6 +27,9 @@ import java.util.List;
 public class ProductoTController {
     @Autowired
     MaintenanceProducto maintenanceProducto;
+
+    @Autowired
+    MaintenanceUsuario maintenanceUsuario;
 
     @GetMapping("/login")
     public String login(Model model) {
@@ -84,8 +95,40 @@ public class ProductoTController {
     }
 
     @GetMapping("/car-to-shop")
-    public String car(Model model) {
-        return "Car";
+    public String car(Model model, Principal principal) {
+        try {
+            UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
+            String username = userDetails.getUsername();
+
+            UsuarioDto usuario = maintenanceUsuario.usuario(username);
+
+            if (usuario == null) {
+                System.out.println("Usuario no encontrado para el email: " + username);
+                return "redirect:/start/home";
+            }
+
+            Integer id = usuario.idUsuario();
+            model.addAttribute("idUsuario", id);
+            return "Car";
+        } catch (Exception e) {
+            System.out.println("Error en el metodo: " + e.getMessage());
+            return "redirect:/start/home";
+        }
+    }
+
+    @PostMapping("/procesar-carrito")
+    @ResponseBody
+    public ResponseEntity<String> procesarCarrito(@RequestBody CompraRequestDto compraRequest) {
+        try {
+            Integer idUsuario = compraRequest.idUsuario();
+            String tarjeta = compraRequest.tarjeta();
+            List<CompraDataDto> detalleJson = compraRequest.detalleJson();
+
+            System.out.println("Compra recibida: " + compraRequest);
+            return ResponseEntity.ok("Compra procesada con éxito");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al procesar la compra");
+        }
     }
 
     @GetMapping("/add")

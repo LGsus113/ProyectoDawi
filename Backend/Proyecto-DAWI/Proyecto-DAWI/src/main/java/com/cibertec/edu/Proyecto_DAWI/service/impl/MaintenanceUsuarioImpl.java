@@ -43,4 +43,15 @@ public class MaintenanceUsuarioImpl implements MaintenanceUsuario {
                 )
         );
     }
+
+    @Override
+    public UsuarioDto usuario(String username) {
+        Optional<Usuario> optional = usuarioRepository.findByNombre(username);
+        return optional.map(u -> new UsuarioDto(
+                u.getIdUsuario(),
+                u.getNombre(),
+                u.getRol(),
+                u.getEstado())
+        ).orElse(null);
+    }
 }

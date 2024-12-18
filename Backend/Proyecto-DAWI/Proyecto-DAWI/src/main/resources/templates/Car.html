@@ -33,12 +33,30 @@
         <div class="total-container">
             <h4><strong>Totales Del Carrito</strong></h4>
             <hr>
-            <p>Car. Subtotal: <span class="float-right" th:text="${'$' + subtotal}">$0.00</span></p>
-            <p class="descuento">Descuento: <span class="float-right" th:text="${'$' + descuento}">$0</span></p>
+            <p>Car. Subtotal: <span class="float-right" id="subtotal">S/.0.00</span></p>
+            <p class="descuento">Descuento: <span class="float-right" id="descuento">S/.0.00</span></p>
             <hr>
-            <p><strong>Total: </strong> <span class="float-right font-weight-bold" th:text="${'$' + total}">$0.00</span></p>
-            <button class="btn btn-procesar btn-block">Procesar</button>
+            <p><strong>Total: </strong> <span class="float-right font-weight-bold" id="total">S/.0.00</span></p>
         </div>
+
+        <div>
+            <div class="mb-3 row">
+                <label for="idUsuario" class="col-sm-3 col-form-label">Código:</label>
+                <div class="col-sm-9">
+                    <input type="text" id="idUsuario" th:value="${idUsuario}" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="tarjeta" class="col-sm-3 col-form-label">Tarjeta:</label>
+                <div class="col-sm-9">
+                    <input type="text" id="tarjeta" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-procesar btn-block" onclick="procesarCarrito()">Procesar</button>
     </div>
+
+    <script src="/js/CarTo.js"></script>
 </body>
 </html>
