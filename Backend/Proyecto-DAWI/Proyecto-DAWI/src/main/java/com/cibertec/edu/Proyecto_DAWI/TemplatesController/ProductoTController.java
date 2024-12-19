@@ -2,16 +2,19 @@ package com.cibertec.edu.Proyecto_DAWI.TemplatesController;
 
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraRequestDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.ProductCompleteDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.StockProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.UpdateDetailProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.UsuarioDto;
+import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceCompra;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -19,8 +22,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/start")
@@ -30,6 +36,11 @@ public class ProductoTController {
 
     @Autowired
     MaintenanceUsuario maintenanceUsuario;
+
+    @Autowired
+    MaintenanceCompra maintenanceCompra;
+
+    private List<ProductCompleteDto> listComprar = new ArrayList<>();
 
     @GetMapping("/login")
     public String login(Model model) {
@@ -94,6 +105,32 @@ public class ProductoTController {
         return "Home";
     }
 
+    @GetMapping("/env-cart/{id}")
+    public String enviar(@PathVariable("id") Integer idProduct) {
+        List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
+        ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
+
+        if (productoDto != null) {
+            ProductCompleteDto producto = new ProductCompleteDto(
+                    productoDto.idProducto(),
+                    productoDto.nombre(),
+                    productoDto.precio(),
+                    1,
+                    productoDto.stock(),
+                    productoDto.precio()
+            );
+            listComprar.add(producto);
+        }
+
+        return "redirect:/start/home";
+    }
+
+    @GetMapping("/del-cart/{id}")
+    public String quitar(@PathVariable("id") Integer idProduct) {
+        listComprar.removeIf(product -> product.idProducto().equals(idProduct));
+        return "redirect:/start/car-to-shop";
+    }
+
     @GetMapping("/car-to-shop")
     public String car(Model model, Principal principal) {
         try {
@@ -108,7 +145,16 @@ public class ProductoTController {
             }
 
             Integer id = usuario.idUsuario();
+
+            BigDecimal totalCarrito = BigDecimal.ZERO;
+            for (ProductCompleteDto p : listComprar) {
+                totalCarrito = totalCarrito.add(p.totalCoste());
+            }
+
             model.addAttribute("idUsuario", id);
+            model.addAttribute("productoTable", listComprar);
+            model.addAttribute("totalCarrito", totalCarrito);
+
             return "Car";
         } catch (Exception e) {
             System.out.println("Error en el metodo: " + e.getMessage());
@@ -116,18 +162,60 @@ public class ProductoTController {
         }
     }
 
-    @PostMapping("/procesar-carrito")
-    @ResponseBody
-    public ResponseEntity<String> procesarCarrito(@RequestBody CompraRequestDto compraRequest) {
-        try {
-            Integer idUsuario = compraRequest.idUsuario();
-            String tarjeta = compraRequest.tarjeta();
-            List<CompraDataDto> detalleJson = compraRequest.detalleJson();
+    @GetMapping("/update-cart/{id}")
+    public String updateCart(
+            @PathVariable Integer id,
+            @RequestParam Integer cantidad
+    ) {
+        for (ProductCompleteDto p : listComprar) {
+            if (p.idProducto().equals(id)) {
+                listComprar.set(
+                        listComprar.indexOf(p),
+                        new ProductCompleteDto(
+                                p.idProducto(),
+                                p.nombre(),
+                                p.precio(),
+                                cantidad,
+                                p.stock(),
+                                p.precio().multiply(new BigDecimal(cantidad))
+                        )
+                );
+                break;
+            }
+        }
 
-            System.out.println("Compra recibida: " + compraRequest);
-            return ResponseEntity.ok("Compra procesada con éxito");
+        return "redirect:/start/car-to-shop";
+    }
+
+    @PostMapping("/procesar-carrito")
+    public String procesarCarrito(
+            @RequestParam Integer idUsuario,
+            @RequestParam String tarjeta
+    ) {
+        try {
+            if (idUsuario == null || tarjeta == null || tarjeta.isEmpty()) {
+                return "redirect:/start/car-to-shop?error=InvalidInput";
+            }
+
+            List<CompraDataDto> p = listComprar.stream()
+                    .map(prod -> new CompraDataDto(
+                            prod.idProducto(),
+                            prod.cantidad(),
+                            prod.precio()
+                    )).collect(Collectors.toList());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(p);
+
+            maintenanceCompra.registrarCompra(idUsuario, tarjeta , jsonString);
+
+            listComprar.clear();
+
+            return "redirect:/start/home";
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al procesar la compra");
+            System.out.println("Error en: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/start/car-to-shop";
         }
     }
 

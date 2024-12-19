@@ -41,9 +41,11 @@
                     </p>
                 </div>
                 <div class="card-footer bg-light d-flex justify-content-center">
-                    <button class="btn btn-outline-primary fw-bold" th:attr="data-idProducto=${producto.idProducto}" onclick="agregarAlCarrito(this)">
-                        Añadir al carrito
-                    </button>
+                    <form th:action="@{'/start/env-cart/' + ${producto.idProducto}}">
+                        <button type="submit" class="btn btn-outline-primary fw-bold">
+                            Añadir al carrito
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -51,6 +53,5 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script src="/js/Catalog.js"></script>
 </body>
 </html>

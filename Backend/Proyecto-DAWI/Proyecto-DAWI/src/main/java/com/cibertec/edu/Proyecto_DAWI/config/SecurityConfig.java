@@ -23,6 +23,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/start/products-all").hasAnyRole("Admin")
                         .requestMatchers("/start/home").hasAnyRole("Usuario")
+                        .requestMatchers("/start/car-to-shop").hasAnyRole("Usuario")
+                        .requestMatchers("/start/procesar-carrito").hasAnyRole("Usuario")
                         .requestMatchers("/start/add").hasAnyRole("Admin")
                         .requestMatchers("/start/update").hasAnyRole("Admin")
                         .anyRequest().authenticated()

@@ -7,56 +7,119 @@
     <title>Carrito de Compras</title>
 </head>
 <body>
-    <div class="carrito-container">
+<div class="carrito-container">
+    <div class="row d-flex justify-content-between align-items-center">
         <h2 class="text-center">Carrito de Compras</h2>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Total</th>
-                    <th>Eliminar</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <img src="https://img.icons8.com/ios/50/000000/shopping-cart.png" alt="Carrito Vacío">
-                        <p>Carrito Vacío</p>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="total-container">
-            <h4><strong>Totales Del Carrito</strong></h4>
-            <hr>
-            <p>Car. Subtotal: <span class="float-right" id="subtotal">S/.0.00</span></p>
-            <p class="descuento">Descuento: <span class="float-right" id="descuento">S/.0.00</span></p>
-            <hr>
-            <p><strong>Total: </strong> <span class="float-right font-weight-bold" id="total">S/.0.00</span></p>
+        <div class="container">
+            <button class="btn btn-primary btn-sm" onclick="location.href='/start/home'">Ir a Principal</button>
         </div>
-
-        <div>
-            <div class="mb-3 row">
-                <label for="idUsuario" class="col-sm-3 col-form-label">Código:</label>
-                <div class="col-sm-9">
-                    <input type="text" id="idUsuario" th:value="${idUsuario}" class="form-control" readonly>
-                </div>
-            </div>
-            <div class="mb-3 row">
-                <label for="tarjeta" class="col-sm-3 col-form-label">Tarjeta:</label>
-                <div class="col-sm-9">
-                    <input type="text" id="tarjeta" class="form-control">
-                </div>
-            </div>
-        </div>
-
-        <button class="btn btn-procesar btn-block" onclick="procesarCarrito()">Procesar</button>
     </div>
 
-    <script src="/js/CarTo.js"></script>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Cant. Disponibles</th>
+            <th>Eliminar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(productoTable)}">
+            <td colspan="5" class="text-center">
+                <img src="https://img.icons8.com/ios/50/000000/shopping-cart.png" alt="Carrito Vacío">
+                <p>Carrito Vacío</p>
+            </td>
+        </tr>
+        <tr th:each="producto : ${productoTable}">
+            <td class="text-center" th:text="${producto.nombre()}"></td>
+            <td class="text-center" th:text="${producto.precio()}"></td>
+            <td>
+                <form th:id="'formActualizacionProd_' + ${producto.idProducto}"
+                      th:action="@{'/start/update-cart/' + ${producto.idProducto}}">
+                    <input type="number"
+                           id="cantidad"
+                           name="cantidad"
+                           class="inputDeCantidades"
+                           th:value="${producto.cantidad()}"
+                           min="1"
+                           th:attr="max=${producto.stock()}"
+                           onchange="handleChange(this)"/>
+                </form>
+            </td>
+            <td class="text-center" th:text="${producto.stock() - producto.cantidad()}"></td>
+            <td>
+                <form th:action="@{'/start/del-cart/' + ${producto.idProducto}}">
+                    <button type="submit" class="btn btn-danger btn-sm">Quitar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><strong>Totales del Carrito</strong></h5>
+                        <hr>
+                        <p class="descuento"><strong>Car. Subtotal: </strong><span class="float-right font-weight-bold" id="subtotal">
+                            <span class="currency-symbol">S/.</span><span th:text="${totalCarrito}">0.00</span>
+                        </span></p>
+                        <p class="descuento">Descuento: <span class="float-right" id="descuento">S/.0</span></p>
+                        <hr>
+                        <p><strong>Total: </strong><span class="float-right font-weight-bold" id="total">
+                            <span class="currency-symbol">S/.</span><span th:text="${totalCarrito}">0.00</span>
+                        </span></p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><strong>Procesar Pedido</strong></h5>
+                        <form id="procesarForm" th:action="@{'/start/procesar-carrito'}" method="post">
+                            <div class="mb-3">
+                                <label for="idUsuario" class="form-label">Código:</label>
+                                <input type="text" id="idUsuario" name="idUsuario" th:value="${idUsuario}"
+                                       class="form-control" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tarjeta" class="form-label">Tarjeta:</label>
+                                <input
+                                        type="text"
+                                        id="tarjeta"
+                                        name="tarjeta"
+                                        class="form-control"
+                                        minlength="16"
+                                        maxlength="16"
+                                        pattern="\d{16}"
+                                        required
+                                        placeholder="Ingrese su número de tarjeta"/>
+                                <div class="invalid-feedback">
+                                    El número de tarjeta debe tener exactamente 16 dígitos.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">Procesar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleChange(inputElement) {
+        const form = inputElement.closest('form');
+        form.submit();
+    }
+</script>
 </body>
 </html>
