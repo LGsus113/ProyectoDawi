@@ -5,9 +5,6 @@ import com.cibertec.edu.Proyecto_DAWI.entity.Usuario;
 import com.cibertec.edu.Proyecto_DAWI.repository.UsuarioRepository;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +16,7 @@ public class MaintenanceUsuarioImpl implements MaintenanceUsuario {
     @Autowired
     UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private CacheManager cacheManager;
-
     @Override
-    @Cacheable(value = "user")
     public UsuarioDto usuarioValidado(String email, String password) {
         Optional<Usuario> optional = usuarioRepository.sp_autenticar_usuario(email, password);
 

@@ -1,7 +1,6 @@
 package com.cibertec.edu.Proyecto_DAWI.TemplatesController;
 
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraRequestDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.ProductCompleteDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
@@ -13,7 +12,6 @@ import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Controller

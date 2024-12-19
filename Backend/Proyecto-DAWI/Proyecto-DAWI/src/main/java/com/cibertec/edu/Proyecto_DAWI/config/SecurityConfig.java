@@ -19,21 +19,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/start/login").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/start/products-all").hasAnyRole("Admin")
-                        .requestMatchers("/start/home").hasAnyRole("Usuario")
-                        .requestMatchers("/start/car-to-shop").hasAnyRole("Usuario")
-                        .requestMatchers("/start/procesar-carrito").hasAnyRole("Usuario")
-                        .requestMatchers("/start/add").hasAnyRole("Admin")
-                        .requestMatchers("/start/update").hasAnyRole("Admin")
+                        .requestMatchers("/start/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/start/products-all", "/start/add", "/start/update").hasAnyRole("Admin")
+                        .requestMatchers("/start/home", "/start/car-to-shop", "/start/procesar-carrito").hasAnyRole("Usuario")
                         .anyRequest().authenticated()
                 )
 
                 .exceptionHandling(ex -> ex
-                        .accessDeniedHandler((req, rsp, e) -> {
-                            rsp.sendRedirect("/start/restricted");
-                        })
+                        .accessDeniedHandler((req, rsp, e) -> {rsp.sendRedirect("/start/restricted");})
                 )
 
                 .formLogin(form -> form
