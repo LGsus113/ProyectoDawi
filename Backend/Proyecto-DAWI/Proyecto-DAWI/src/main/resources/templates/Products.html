@@ -21,7 +21,9 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li sec:authorize="hasRole('Admin')">
-                            <button type="button" class="dropdown-item" onclick="location.href='/start/add'">Nuevo Producto</button>
+                            <button type="button" class="dropdown-item" onclick="location.href='/start/add'">Nuevo
+                                Producto
+                            </button>
                         </li>
                         <li sec:authorize="hasRole('Admin')">
                             <button id="toggleListado" class="dropdown-item">Cambiar Estado</button>
@@ -42,6 +44,27 @@
             </div>
         </nav>
 
+        <div
+                id="notification-toast"
+                class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+                th:if="${success}"
+        >
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span th:text="${success}"></span>
+                </div>
+                <button
+                        type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"
+                ></button>
+            </div>
+        </div>
+
         <div id="productosContainer">
             <div th:replace="fragments/productos :: productosTable"></div>
         </div>
@@ -57,6 +80,14 @@
             crossorigin="anonymous"
     ></script>
     <script src="/js/EventsProducts.js"></script>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toastEl = document.getElementById("notification-toast");
+            if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+    </script>
 </body>
 </html>

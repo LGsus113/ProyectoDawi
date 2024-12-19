@@ -16,6 +16,10 @@
         </div>
     </div>
 
+    <div class="card-footer text-danger text-center" th:if="${message}">
+        <p th:text="${message}"></p>
+    </div>
+
     <table class="table table-bordered">
         <thead>
         <tr>
@@ -76,7 +80,6 @@
                         </span></p>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-6">
                 <div class="card">

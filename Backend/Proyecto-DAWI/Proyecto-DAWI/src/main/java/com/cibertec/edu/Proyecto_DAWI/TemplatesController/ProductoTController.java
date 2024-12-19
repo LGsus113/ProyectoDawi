@@ -57,10 +57,13 @@ public class ProductoTController {
             @RequestParam(defaultValue = "10") int size
     ) {
         try {
+            String textTitle = listado ? "Productos disponibles" : "Productos no disponibles";
+
             Page<ProductoDto> productosPage = maintenanceProducto.productosPorDisponibilidadPaginado(listado, page, size);
             model.addAttribute("productosPage", productosPage);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", productosPage.getTotalPages());
+            model.addAttribute("title", textTitle);
             model.addAttribute("error", null);
         } catch (Exception e) {
             model.addAttribute("error", "Error al traer los datos: " + e.getMessage());
@@ -77,10 +80,13 @@ public class ProductoTController {
             @RequestParam(defaultValue = "10") int size
     ) {
         try {
+            String textTitle = listado ? "Productos disponibles" : "Productos no disponibles";
+
             Page<ProductoDto> productosPage = maintenanceProducto.productosPorDisponibilidadPaginado(listado, page, size);
             model.addAttribute("productosPage", productosPage);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", productosPage.getTotalPages());
+            model.addAttribute("title", textTitle);
             model.addAttribute("error", null);
         } catch (Exception e) {
             model.addAttribute("error", "Error al traer los datos: " + e.getMessage());
@@ -186,6 +192,7 @@ public class ProductoTController {
 
     @PostMapping("/procesar-carrito")
     public String procesarCarrito(
+            RedirectAttributes redirectAttributes,
             @RequestParam Integer idUsuario,
             @RequestParam String tarjeta
     ) {
@@ -208,10 +215,15 @@ public class ProductoTController {
 
             listComprar.clear();
 
+            redirectAttributes.addFlashAttribute("message", "¿Te sientes exitado? Porque tu compra fue exitosa.");
+
             return "redirect:/start/home";
         } catch (Exception e) {
             System.out.println("Error en: " + e.getMessage());
             e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute("message", "Erro en tu compra.");
+
             return "redirect:/start/car-to-shop";
         }
     }
@@ -300,7 +312,7 @@ public class ProductoTController {
             if (Boolean.TRUE.equals(respuesta)) {
                 redirectAttributes.addFlashAttribute("success", respuesta1);
             } else {
-                redirectAttributes.addFlashAttribute("error", respuesta2);
+                redirectAttributes.addFlashAttribute("success", respuesta2);
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Hubo un error: " + e.getMessage());

@@ -23,6 +23,27 @@
         </div>
     </div>
 
+    <div
+         id="notification-toast-n2"
+         class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         th:if="${message}"
+    >
+        <div class="d-flex">
+            <div class="toast-body">
+                <span th:text="${message}"></span>
+            </div>
+            <button
+                    type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+            ></button>
+        </div>
+    </div>
+
     <div class="row mt-4" id="productosContainer">
         <div class="col-md-4" th:each="producto : ${productos}">
             <div class="card shadow-sm mb-4">
