@@ -135,6 +135,52 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+-- Procedures por separado para generar la venta con detalle -------------------------------------------------------------------------------------------
+DELIMITER $$
+CREATE PROCEDURE sp_registrar_compra_inicial(
+    IN p_id_usu INT,
+    IN p_tarjeta VARCHAR(16)
+)
+BEGIN
+	INSERT INTO Compras(id_usu, tarjeta, total) VALUES (p_id_usu, p_tarjeta, 0);
+    SELECT LAST_INSERT_ID() AS id_compra; -- Aquí obtenemos el id de la compra registrada y lo devolvemos en el parametro de salida (OUT)
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE sp_registrar_detalle_compra(
+    IN p_id_compra INT,
+    IN p_id_prod INT,
+    IN p_cantidad INT,
+    IN p_precio_unitario DECIMAL(10, 2)
+)
+BEGIN
+	INSERT INTO Detalle_Compra (id_com, id_prod, cantidad, precio_unitario)
+    VALUES (p_id_compra, p_id_prod, p_cantidad, p_precio_unitario);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_total_compra(
+    IN p_id_compra INT
+)
+BEGIN
+	DECLARE v_total DECIMAL(10, 2);
+    
+    -- Aquí calculamos el total de la compra con los productos del detalle de compra
+    SELECT SUM(cantidad * precio_unitario)
+    INTO v_total
+    FROM Detalle_Compra
+    WHERE id_com = p_id_compra;
+    
+    -- Una vez obtenido el total, lo actualizamos en la tabla compra dependiendo de su id
+    UPDATE Compras SET total = v_total WHERE id_compra = p_id_compra;
+END$$
+DELIMITER ;
+-- Fin -------------------------------------------------------------------------------------------------------------------------------------------
+
+
 DELIMITER $$
 CREATE PROCEDURE sp_listar_productos(
     IN p_disponibles TINYINT -- 1: Disponibles, 0: Inactivos

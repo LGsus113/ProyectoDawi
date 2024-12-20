@@ -26,7 +26,7 @@ public class ComproController {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writeValueAsString(detalleJson);
 
-            maintenanceCompra.registrarCompra(idUsuario, tarjeta, jsonString);
+            maintenanceCompra.registrarCompra1(idUsuario, tarjeta, jsonString);
 
             return "Registro exitoso";
         } catch (DataAccessException e) {

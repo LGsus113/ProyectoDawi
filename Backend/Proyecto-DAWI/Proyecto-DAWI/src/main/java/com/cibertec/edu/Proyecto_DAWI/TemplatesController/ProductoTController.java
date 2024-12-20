@@ -11,6 +11,7 @@ import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceCompra;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -205,22 +206,21 @@ public class ProductoTController {
                 return "redirect:/start/car-to-shop?error=InvalidInput";
             }
 
-            List<CompraDataDto> p = listComprar.stream()
+            List<CompraDataDto> productsList = listComprar.stream()
                     .map(prod -> new CompraDataDto(
                             prod.idProducto(),
                             prod.cantidad(),
                             prod.precio()
                     )).collect(Collectors.toList());
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonString = objectMapper.writeValueAsString(p);
-
-            maintenanceCompra.registrarCompra(idUsuario, tarjeta , jsonString);
+            Integer id = maintenanceCompra.registrarCompra(idUsuario, tarjeta , productsList);
 
             listComprar.clear();
 
-            redirectAttributes.addFlashAttribute("message", "¿Te sientes exitado? Porque tu compra fue exitosa.");
-
+            redirectAttributes.addFlashAttribute(
+                    "message",
+                    "¿Te sientes exitado? Porque tu compra fue exitosa. El ID de la compra es: " + id
+            );
             return "redirect:/start/home";
         } catch (Exception e) {
             System.out.println("Error en: " + e.getMessage());
