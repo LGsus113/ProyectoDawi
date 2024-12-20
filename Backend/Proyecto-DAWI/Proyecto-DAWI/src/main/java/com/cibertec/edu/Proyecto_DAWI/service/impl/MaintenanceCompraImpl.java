@@ -13,7 +13,7 @@ public class MaintenanceCompraImpl implements MaintenanceCompra {
     private CompraRepository compraRepository;
 
     @Override
-    public void registrarCompra(Integer idUsuario, String tarjeta, String detalleJson) {
+    public void registrarCompra(Integer idUsuario, String tarjeta, String detalleJson) throws Exception {
         compraRepository.sp_registrar_compra(idUsuario, tarjeta, detalleJson);
     }
 }

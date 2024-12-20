@@ -38,7 +38,7 @@ public class MaintenanceUsuarioImpl implements MaintenanceUsuario {
     }
 
     @Override
-    public UsuarioDto usuario(String username) {
+    public UsuarioDto usuario(String username) throws Exception {
         Optional<Usuario> optional = usuarioRepository.findByNombre(username);
         return optional.map(u -> new UsuarioDto(
                 u.getIdUsuario(),

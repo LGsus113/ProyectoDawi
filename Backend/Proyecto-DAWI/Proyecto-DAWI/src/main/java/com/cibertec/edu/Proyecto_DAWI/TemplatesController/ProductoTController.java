@@ -110,19 +110,23 @@ public class ProductoTController {
 
     @GetMapping("/env-cart/{id}")
     public String enviar(@PathVariable("id") Integer idProduct) {
-        List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
-        ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
+        try {
+            List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
+            ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
 
-        if (productoDto != null) {
-            ProductCompleteDto producto = new ProductCompleteDto(
-                    productoDto.idProducto(),
-                    productoDto.nombre(),
-                    productoDto.precio(),
-                    1,
-                    productoDto.stock(),
-                    productoDto.precio()
-            );
-            listComprar.add(producto);
+            if (productoDto != null) {
+                ProductCompleteDto producto = new ProductCompleteDto(
+                        productoDto.idProducto(),
+                        productoDto.nombre(),
+                        productoDto.precio(),
+                        1,
+                        productoDto.stock(),
+                        productoDto.precio()
+                );
+                listComprar.add(producto);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
 
         return "redirect:/start/home";

@@ -26,7 +26,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     ProductoRepository productoRepository;
 
     @Override
-    public List<ProductoDto> productosPorDisponibilidad(boolean disponibilidad) {
+    public List<ProductoDto> productosPorDisponibilidad(boolean disponibilidad) throws Exception {
         List<ProductoDto> productos = new ArrayList<ProductoDto>();
         Iterable<Producto> iterable = productoRepository.sp_listar_productos(disponibilidad);
 
@@ -47,7 +47,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public Page<ProductoDto> productosPorDisponibilidadPaginado(boolean disponibilidad, int page, int size) {
+    public Page<ProductoDto> productosPorDisponibilidadPaginado(boolean disponibilidad, int page, int size) throws Exception {
         List<ProductoDto> productos = new ArrayList<ProductoDto>();
         Iterable<Producto> iterable = productoRepository.sp_listar_productos(disponibilidad);
 
@@ -72,7 +72,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public void createProducto(CreateProductoDto createProducto) {
+    public void createProducto(CreateProductoDto createProducto) throws Exception {
         Producto p = new Producto(
                 createProducto.nombre(),
                 createProducto.descripcion(),
@@ -85,7 +85,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public Boolean updateProducto(UpdateDetailProductoDto updateProducto) {
+    public Boolean updateProducto(UpdateDetailProductoDto updateProducto) throws Exception {
         Optional<Producto> optional = productoRepository.findById(updateProducto.idProducto());
 
         return optional.map(
@@ -101,7 +101,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public Boolean updateStockProducto(StockProductoDto stockProductoDto) {
+    public Boolean updateStockProducto(StockProductoDto stockProductoDto) throws Exception {
         Optional<Producto> optional = productoRepository.findById(stockProductoDto.idProducto());
 
         return optional.map(
@@ -115,7 +115,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public Boolean habilitarProductos(Integer idProducto) {
+    public Boolean habilitarProductos(Integer idProducto) throws Exception {
         List<Map<String, Object>> resultado = productoRepository.sp_habilitar_producto(idProducto);
 
         if (resultado != null && !resultado.isEmpty()) {
@@ -130,7 +130,7 @@ public class MaintenanceProductoImpl implements MaintenanceProducto {
     }
 
     @Override
-    public Boolean deshabilitarProductos(Integer idProducto) {
+    public Boolean deshabilitarProductos(Integer idProducto) throws Exception {
         List<Map<String, Object>> resultado = productoRepository.sp_deshabilitar_producto(idProducto);
 
         if (resultado != null && !resultado.isEmpty()) {
