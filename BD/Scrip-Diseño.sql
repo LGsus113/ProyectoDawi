@@ -69,6 +69,7 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- Primer procedure hecho para manejar la logica desde la bd, ya se cambió y se mejoró -----------------------------------------
 DELIMITER $$
 CREATE PROCEDURE sp_registrar_compra(
     IN p_id_usu INT,
@@ -134,7 +135,7 @@ BEGIN
     COMMIT;
 END$$
 DELIMITER ;
-
+-- Aca finaliza ----------------------------------------------------------------------------------------------------------------
 
 -- Procedures por separado para generar la venta con detalle -------------------------------------------------------------------------------------------
 DELIMITER $$
@@ -179,7 +180,6 @@ BEGIN
 END$$
 DELIMITER ;
 -- Fin -------------------------------------------------------------------------------------------------------------------------------------------
-
 
 DELIMITER $$
 CREATE PROCEDURE sp_listar_productos(
@@ -237,6 +237,42 @@ BEGIN
 
     -- Retorna el resultado
     SELECT resultado;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_datos_compras_cliente(
+    IN p_id_usuario INT
+)
+BEGIN
+    SELECT
+        c.id_compra,
+        c.id_usu,
+        c.fecha,
+        c.tarjeta,
+        c.total
+    FROM Compras c
+    WHERE c.id_usu = p_id_usuario;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_detalle_compra_cliente(
+    IN p_id_usuario INT
+)
+BEGIN
+    SELECT
+		d.id_deta_compra,
+		d.id_com,
+        d.id_prod,
+        p.nombre,
+        d.cantidad,
+        d.precio_unitario,
+        d.subtotal
+    FROM Detalle_Compra d
+    JOIN Productos p ON d.id_prod = p.id_producto
+    JOIN Compras c ON d.id_com = c.id_compra
+    WHERE c.id_usu = p_id_usuario;
 END$$
 DELIMITER ;
 

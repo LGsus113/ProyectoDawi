@@ -1,6 +1,7 @@
 package com.cibertec.edu.Proyecto_DAWI.TemplatesController;
 
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.DetalleCompraDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.ProductCompleteDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
@@ -229,6 +230,32 @@ public class ProductoTController {
             redirectAttributes.addFlashAttribute("message", "Erro en tu compra.");
 
             return "redirect:/start/car-to-shop";
+        }
+    }
+
+    @GetMapping("/compras-usuario")
+    public String listarCompras(Model model, Principal principal) {
+        try {
+            UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
+            String username = userDetails.getUsername();
+
+            UsuarioDto usuario = maintenanceUsuario.usuario(username);
+
+            if (usuario == null) {
+                System.out.println("Usuario no encontrado para el email: " + username);
+                return "redirect:/start/home";
+            }
+
+            Integer id = usuario.idUsuario();
+
+            List<DetalleCompraDto> comprasDetalladas = maintenanceCompra.listarComprasPorCliente(id);
+            model.addAttribute("detallesCompra", comprasDetalladas);
+            model.addAttribute("error", null);
+            return "DetalleCompra";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Ocurrio un error: " + e.getMessage());
+            return "redirect:/start/home";
         }
     }
 

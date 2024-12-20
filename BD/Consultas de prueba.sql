@@ -47,3 +47,5 @@ CALL sp_autenticar_usuario(
 
 CALL sp_deshabilitar_producto(1);
 CALL sp_habilitar_producto(2);
+CALL sp_listar_datos_compras_cliente(1);
+CALL sp_listar_detalle_compra_cliente(1);

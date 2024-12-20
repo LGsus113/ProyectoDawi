@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 public class Compra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_compra")
     private Integer idCompra;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_usu", referencedColumnName = "idUsuario", nullable = false)
-    private Usuario usuario;
+    @Column(name = "id_usu", nullable = false)
+    private Integer idUsuario;
 
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
@@ -28,4 +28,8 @@ public class Compra {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usu", nullable = false, insertable = false, updatable = false)
+    private Usuario usuario;
 }

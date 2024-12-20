@@ -13,22 +13,32 @@ import java.math.BigDecimal;
 public class DetalleCompra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_deta_compra")
     private Integer idDetaCompra;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_com", referencedColumnName = "idCompra", nullable = false)
-    private Compra compra;
+    @Column(name = "id_com", nullable = false)
+    private Integer idCompra;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_prod", referencedColumnName = "idProducto", nullable = false)
-    private Producto producto;
+    @Column(name = "id_prod", nullable = false)
+    private Integer idProducto;
 
-    @Column(nullable = false)
+    @Transient
+    private String nombre;
+
+    @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioUnitario;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_com", nullable = false, insertable = false, updatable = false)
+    private Compra compra;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_prod", nullable = false, insertable = false, updatable = false)
+    private Producto producto;
 }
