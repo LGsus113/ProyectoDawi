@@ -42,12 +42,23 @@ public class ProductoTController {
     private List<ProductCompleteDto> listComprar = new ArrayList<>();
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(
+            @RequestParam(value = "logout", required = false) String logout,
+            @RequestParam(value = "error", required = false) String error,
+            Model model
+    ) {
+        if (logout != null) {
+            model.addAttribute("logout", true);
+        }
+
+        if (error != null) {
+            model.addAttribute("error", true);
+        }
         return "Login";
     }
 
     @GetMapping("/restricted")
-    public String restricted(Model model) {
+    public String restricted() {
         return "Restricted";
     }
 
@@ -111,7 +122,10 @@ public class ProductoTController {
     }
 
     @GetMapping("/env-cart/{id}")
-    public String enviar(@PathVariable("id") Integer idProduct) {
+    public String enviar(
+            @PathVariable("id") Integer idProduct,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
             ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
@@ -127,8 +141,13 @@ public class ProductoTController {
                 );
                 listComprar.add(producto);
             }
+
+            redirectAttributes.addFlashAttribute(
+                    "message",
+                    "Producto enviado"
+            );
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
         }
 
         return "redirect:/start/home";
@@ -141,7 +160,11 @@ public class ProductoTController {
     }
 
     @GetMapping("/car-to-shop")
-    public String car(Model model, Principal principal) {
+    public String car(
+            Model model,
+            Principal principal,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
             String username = userDetails.getUsername();
@@ -149,7 +172,7 @@ public class ProductoTController {
             UsuarioDto usuario = maintenanceUsuario.usuario(username);
 
             if (usuario == null) {
-                System.out.println("Usuario no encontrado para el email: " + username);
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado: " + username);
                 return "redirect:/start/home";
             }
 
@@ -166,7 +189,7 @@ public class ProductoTController {
 
             return "Car";
         } catch (Exception e) {
-            System.out.println("Error en el metodo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error en el metodo: " + e.getMessage());
             return "redirect:/start/home";
         }
     }
@@ -234,7 +257,11 @@ public class ProductoTController {
     }
 
     @GetMapping("/compras-usuario")
-    public String listarCompras(Model model, Principal principal) {
+    public String listarCompras(
+            Model model,
+            Principal principal,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
             String username = userDetails.getUsername();
@@ -242,7 +269,7 @@ public class ProductoTController {
             UsuarioDto usuario = maintenanceUsuario.usuario(username);
 
             if (usuario == null) {
-                System.out.println("Usuario no encontrado para el email: " + username);
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado: " + username);
                 return "redirect:/start/home";
             }
 
@@ -254,7 +281,7 @@ public class ProductoTController {
             return "DetalleCompra";
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "Ocurrio un error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Ocurrio un error: " + e.getMessage());
             return "redirect:/start/home";
         }
     }
@@ -265,17 +292,27 @@ public class ProductoTController {
     }
 
     @PostMapping("/add-new")
-    public String addNew(@ModelAttribute CreateProductoDto createProducto) {
+    public String addNew(
+            @ModelAttribute CreateProductoDto createProducto,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             maintenanceProducto.createProducto(createProducto);
+            redirectAttributes.addFlashAttribute("message", "Nuevo producto agregado");
             return "redirect:/start/products-all";
         } catch (Exception e) {
+            model.addAttribute("error", "Error al agregar nuevo producto: " + e.getMessage());
             return "Nuevo-Producto";
         }
     }
 
     @GetMapping("/update/{id}")
-    public String update(@PathVariable("id") Integer idProduct, @RequestParam Boolean estado, Model model) {
+    public String update(
+            @PathVariable("id") Integer idProduct,
+            @RequestParam Boolean estado,
+            Model model
+    ) {
         try {
             List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(estado);
             ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
@@ -290,11 +327,16 @@ public class ProductoTController {
     }
 
     @PutMapping("/especification-new")
-    public String actualizarProducto(@ModelAttribute UpdateDetailProductoDto updateProducto, Model model) {
+    public String actualizarProducto(
+            @ModelAttribute UpdateDetailProductoDto updateProducto,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             Boolean updated = maintenanceProducto.updateProducto(updateProducto);
 
             if (Boolean.TRUE.equals(updated)) {
+                redirectAttributes.addFlashAttribute("message", "Producto actualizado");
                 return "redirect:/start/products-all";
             }
 
@@ -307,15 +349,20 @@ public class ProductoTController {
     }
 
     @PutMapping("/update-stock")
-    public String cambiarStock(@ModelAttribute StockProductoDto stockProductoDto, Model model) {
+    public String cambiarStock(
+            @ModelAttribute StockProductoDto stockProductoDto,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             Boolean updated = maintenanceProducto.updateStockProducto(stockProductoDto);
 
             if (Boolean.FALSE.equals(updated)) {
-                model.addAttribute("error", "No se pudo actualizar el stock.");
+                redirectAttributes.addFlashAttribute("error", "No se pudo actualizar el stock.");
             }
+
+            redirectAttributes.addFlashAttribute("message", "Stock Actualizado.");
         } catch (Exception e) {
-            model.addAttribute("error", "Error al actualizar el stock: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar el stock: " + e.getMessage());
         }
 
         return "redirect:/start/products-all";
@@ -341,9 +388,9 @@ public class ProductoTController {
             String respuesta2 = "El producto ya está " + tipoOperacion + ".";
 
             if (Boolean.TRUE.equals(respuesta)) {
-                redirectAttributes.addFlashAttribute("success", respuesta1);
+                redirectAttributes.addFlashAttribute("message", respuesta1);
             } else {
-                redirectAttributes.addFlashAttribute("success", respuesta2);
+                redirectAttributes.addFlashAttribute("message", respuesta2);
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Hubo un error: " + e.getMessage());

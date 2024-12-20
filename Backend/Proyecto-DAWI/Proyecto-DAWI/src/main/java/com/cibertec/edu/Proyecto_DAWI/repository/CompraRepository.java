@@ -1,7 +1,6 @@
 package com.cibertec.edu.Proyecto_DAWI.repository;
 
 import com.cibertec.edu.Proyecto_DAWI.entity.Compra;
-import com.cibertec.edu.Proyecto_DAWI.entity.DetalleCompra;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Modifying;

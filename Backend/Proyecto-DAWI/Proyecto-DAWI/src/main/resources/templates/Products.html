@@ -44,34 +44,51 @@
             </div>
         </nav>
 
-        <div
-                id="notification-toast"
-                class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
-                role="alert"
-                aria-live="assertive"
-                aria-atomic="true"
-                th:if="${success}"
-        >
-            <div class="d-flex">
-                <div class="toast-body">
-                    <span th:text="${success}"></span>
-                </div>
-                <button
-                        type="button"
-                        class="btn-close btn-close-white me-2 m-auto"
-                        data-bs-dismiss="toast"
-                        aria-label="Close"
-                ></button>
-            </div>
-        </div>
-
         <div id="productosContainer">
             <div th:replace="fragments/productos :: productosTable"></div>
         </div>
     </div>
 
-    <div class="card-footer text-danger text-center" th:if="${error}">
-        <p th:text="${error}"></p>
+    <div
+            id="notification-toast-n2"
+            class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            th:if="${message}"
+    >
+        <div class="d-flex">
+            <div class="toast-body">
+                <span th:text="${message}"></span>
+            </div>
+            <button
+                    type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+            ></button>
+        </div>
+    </div>
+
+    <div
+            id="notification-toast-n3"
+            class="toast align-items-center text-white bg-danger border-0 position-fixed bottom-0 end-0 m-3"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            th:if="${error}"
+    >
+        <div class="d-flex">
+            <div class="toast-body">
+                <span th:text="${error}"></span>
+            </div>
+            <button
+                    type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+            ></button>
+        </div>
     </div>
 
     <script
@@ -82,10 +99,17 @@
     <script src="/js/EventsProducts.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const toastEl = document.getElementById("notification-toast");
+            const toastEl = document.getElementById("notification-toast-n2");
+            const toastEl2 = document.getElementById("notification-toast-n3");
+
             if (toastEl) {
                 const toast = new bootstrap.Toast(toastEl);
                 toast.show();
+            }
+
+            if (toastEl2) {
+                const toast2 = new bootstrap.Toast(toastEl2);
+                toast2.show();
             }
         });
     </script>

@@ -7,32 +7,66 @@
     <link rel="stylesheet" href="/css/Home.css">
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 mt-3 mb-2">
-            <h2>Catálogo de Productos</h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mt-3 mb-2">
+                <h2>Catálogo de Productos</h2>
+            </div>
+
+            <div sec:authentication="name" class="col-md-2 mt-4 fw-bold"></div>
+
+            <div class="col-md-4 d-flex justify-content-between align-items-center">
+                <button class="btn btn-primary me-3" onclick="location.href='/start/car-to-shop'">Ver carrito</button>
+                <form th:action="@{/start/compras-usuario}" class="ms-auto" method="get">
+                    <button type="submit" class="btn btn-primary">Ver Compras</button>
+                </form>
+                <form th:action="@{/start/logout}" method="post" class="ms-auto">
+                    <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+                </form>
+            </div>
         </div>
 
-        <div sec:authentication="name" class="col-md-2 mt-4 fw-bold"></div>
-
-        <div class="col-md-4 d-flex justify-content-between align-items-center">
-            <button class="btn btn-primary me-3" onclick="location.href='/start/car-to-shop'">Ver carrito</button>
-            <form th:action="@{/start/compras-usuario}" class="ms-auto" method="get">
-                <button type="submit" class="btn btn-primary">Ver Compras</button>
-            </form>
-            <form th:action="@{/start/logout}" method="post" class="ms-auto">
-                <button type="submit" class="btn btn-danger">Cerrar sesión</button>
-            </form>
+        <div class="row mt-4" id="productosContainer">
+            <div class="col-md-4" th:each="producto : ${productos}">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header d-flex justify-content-center align-items-center">
+                        <h5 class="card-title" th:text="${producto.nombre}" th:attr="data-id=${producto.idProducto}">Nombre
+                            del producto</h5>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" th:attr="id='idOculto' + ${producto.idProducto}"
+                               th:value="${producto.idProducto}">
+                        <p class="card-text">
+                            <strong>ID:</strong> <span class="id" th:text="${producto.idProducto}"
+                                                       th:attr="data-id=${producto.idProducto}"></span><br>
+                            <strong>Descripción:</strong> <span th:text="${producto.descripcion}"></span><br>
+                            <strong>Precio:</strong> S/ <span class="precio" th:text="${producto.precio}"
+                                                              th:attr="data-id=${producto.idProducto}"></span>
+                            <strong>Stock:</strong> <span class="stock" th:text="${producto.stock}"
+                                                          th:attr="data-id=${producto.idProducto}"></span><br>
+                            <strong>Estado:</strong>
+                            <span th:text="${producto.estado ? 'Disponible' : 'No Disponible'}"></span>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-light d-flex justify-content-center">
+                        <form th:action="@{'/start/env-cart/' + ${producto.idProducto}}">
+                            <button type="submit" class="btn btn-outline-primary fw-bold">
+                                Añadir al carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div
-         id="notification-toast-n2"
-         class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
-         role="alert"
-         aria-live="assertive"
-         aria-atomic="true"
-         th:if="${message}"
+            id="notification-toast-n2"
+            class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            th:if="${message}"
     >
         <div class="d-flex">
             <div class="toast-body">
@@ -47,44 +81,43 @@
         </div>
     </div>
 
-    <div class="row mt-4" id="productosContainer">
-        <div class="col-md-4" th:each="producto : ${productos}">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header d-flex justify-content-center align-items-center">
-                    <h5 class="card-title" th:text="${producto.nombre}" th:attr="data-id=${producto.idProducto}">Nombre del producto</h5>
-                </div>
-                <div class="card-body">
-                    <input type="hidden" th:attr="id='idOculto' + ${producto.idProducto}"  th:value="${producto.idProducto}">
-                    <p class="card-text">
-                        <strong>ID:</strong> <span class="id" th:text="${producto.idProducto}" th:attr="data-id=${producto.idProducto}"></span><br>
-                        <strong>Descripción:</strong> <span th:text="${producto.descripcion}"></span><br>
-                        <strong>Precio:</strong> S/ <span class="precio" th:text="${producto.precio}" th:attr="data-id=${producto.idProducto}"></span>
-                        <strong>Stock:</strong> <span class="stock" th:text="${producto.stock}" th:attr="data-id=${producto.idProducto}"></span><br>
-                        <strong>Estado:</strong>
-                        <span th:text="${producto.estado ? 'Disponible' : 'No Disponible'}"></span>
-                    </p>
-                </div>
-                <div class="card-footer bg-light d-flex justify-content-center">
-                    <form th:action="@{'/start/env-cart/' + ${producto.idProducto}}">
-                        <button type="submit" class="btn btn-outline-primary fw-bold">
-                            Añadir al carrito
-                        </button>
-                    </form>
-                </div>
+    <div
+            id="notification-toast-n3"
+            class="toast align-items-center text-white bg-danger border-0 position-fixed bottom-0 end-0 m-3"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            th:if="${error}"
+    >
+        <div class="d-flex">
+            <div class="toast-body">
+                <span th:text="${error}"></span>
             </div>
+            <button
+                    type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+            ></button>
         </div>
     </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toastEl = document.getElementById("notification-toast-n2");
-        if (toastEl) {
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        }
-    });
-</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toastEl = document.getElementById("notification-toast-n2");
+            const toastEl2 = document.getElementById("notification-toast-n3");
+
+            if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+
+            if (toastEl2) {
+                const toast2 = new bootstrap.Toast(toastEl2);
+                toast2.show();
+            }
+        });
+    </script>
 </body>
 </html>
