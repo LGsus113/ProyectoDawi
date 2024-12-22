@@ -1,14 +1,11 @@
 package com.cibertec.edu.Proyecto_DAWI.service.impl;
 
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.DatosNecesariosDto;
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.DetalleCompraDto;
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.ProductoCompraDto;
+import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.*;
+import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.entity.Compra;
 import com.cibertec.edu.Proyecto_DAWI.entity.DetalleCompra;
 import com.cibertec.edu.Proyecto_DAWI.repository.CompraRepository;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceCompra;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +23,9 @@ public class MaintenanceCompraImpl implements MaintenanceCompra {
     @Autowired
     private CompraRepository compraRepository;
 
-    public List<DetalleCompra> setManual(List<Object[]> resultados) {
+    private final List<ProductCompleteDto> listComprar = new ArrayList<>();
+
+    private List<DetalleCompra> setManual(List<Object[]> resultados) {
         List<DetalleCompra> listaDetalleCompra = new ArrayList<>();
 
         for (Object[] fila : resultados) {
@@ -88,10 +87,17 @@ public class MaintenanceCompraImpl implements MaintenanceCompra {
     }
 
     @Override
-    public Integer registrarCompra(Integer idUsuario, String tarjeta, List<CompraDataDto> detalle) throws Exception {
+    public Integer registrarCompra(Integer idUsuario, String tarjeta) throws Exception {
         Integer idCompra = compraRepository.sp_registrar_compra_inicial(idUsuario, tarjeta);
 
-        for (CompraDataDto dto : detalle) {
+        List<CompraDataDto> detalleDeVenta = listComprar.stream()
+                .map(prod -> new CompraDataDto(
+                        prod.idProducto(),
+                        prod.cantidad(),
+                        prod.precio()
+                )).toList();
+
+        for (CompraDataDto dto : detalleDeVenta) {
             compraRepository.sp_registrar_detalle_compra(
                     idCompra,
                     dto.id_prod(),
@@ -102,6 +108,75 @@ public class MaintenanceCompraImpl implements MaintenanceCompra {
 
         compraRepository.sp_actualizar_total_compra(idCompra);
 
+        listComprar.clear();
+
         return idCompra;
     }
+
+    @Override
+    public List<ProductCompleteDto> listarCarrito() throws Exception {
+        return listComprar;
+    }
+
+    @Override
+    public BigDecimal totalCarrito() throws Exception {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (ProductCompleteDto p : listComprar) {
+            total = total.add(p.totalCoste());
+        }
+
+        return total;
+    }
+
+    @Override
+    public Boolean agregarCarrito(List<ProductoDto> p, Integer id) throws Exception {
+        ProductoDto producto = p.stream().filter(pr -> pr.idProducto().equals(id)).findFirst().orElse(null);
+
+        if (producto != null) {
+            ProductCompleteDto productCompleteDto = new ProductCompleteDto(
+                    producto.idProducto(),
+                    producto.nombre(),
+                    producto.precio(),
+                    1,
+                    producto.stock(),
+                    producto.precio()
+            );
+            listComprar.add(productCompleteDto);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public Boolean removerCarrito(Integer id) throws Exception {
+        return listComprar.removeIf(product -> product.idProducto().equals(id));
+    }
+
+    @Override
+    public Boolean actualizarCarrito(Integer id, Integer cantidad) throws Exception {
+        for (ProductCompleteDto p : listComprar) {
+            if (p.idProducto().equals(id)) {
+                listComprar.set(
+                        listComprar.indexOf(p),
+                        new ProductCompleteDto(
+                                p.idProducto(),
+                                p.nombre(),
+                                p.precio(),
+                                cantidad,
+                                p.stock(),
+                                p.precio().multiply(new BigDecimal(cantidad))
+                        )
+                );
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
 }

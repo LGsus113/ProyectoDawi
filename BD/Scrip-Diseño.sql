@@ -145,7 +145,7 @@ CREATE PROCEDURE sp_registrar_compra_inicial(
 )
 BEGIN
 	INSERT INTO Compras(id_usu, tarjeta, total) VALUES (p_id_usu, p_tarjeta, 0);
-    SELECT LAST_INSERT_ID() AS id_compra; -- Aquí obtenemos el id de la compra registrada y lo devolvemos en el parametro de salida (OUT)
+    SELECT LAST_INSERT_ID() AS id_compra; -- Aquí obtenemos el id de la compra registrada y lo devolvemos en el procedure
 END$$
 DELIMITER ;
 
@@ -160,7 +160,7 @@ BEGIN
 	INSERT INTO Detalle_Compra (id_com, id_prod, cantidad, precio_unitario)
     VALUES (p_id_compra, p_id_prod, p_cantidad, p_precio_unitario);
 END$$
-DELIMITER ;
+DELIMITER;
 
 DELIMITER $$
 CREATE PROCEDURE sp_actualizar_total_compra(

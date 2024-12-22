@@ -1,22 +1,16 @@
 package com.cibertec.edu.Proyecto_DAWI.TemplatesController;
 
-import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.CompraDataDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.DetalleCompraDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.CompraDto.ProductCompleteDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.CreateProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.ProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.StockProductoDto;
 import com.cibertec.edu.Proyecto_DAWI.dto.ProductoDto.UpdateDetailProductoDto;
-import com.cibertec.edu.Proyecto_DAWI.dto.UsuarioDto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceCompra;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceProducto;
 import com.cibertec.edu.Proyecto_DAWI.service.MaintenanceUsuario;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +19,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/start")
@@ -38,8 +31,6 @@ public class ProductoTController {
 
     @Autowired
     MaintenanceCompra maintenanceCompra;
-
-    private List<ProductCompleteDto> listComprar = new ArrayList<>();
 
     @GetMapping("/login")
     public String login(
@@ -128,34 +119,56 @@ public class ProductoTController {
     ) {
         try {
             List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(true);
-            ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
+            Boolean respuesta = maintenanceCompra.agregarCarrito(productos, idProduct);
 
-            if (productoDto != null) {
-                ProductCompleteDto producto = new ProductCompleteDto(
-                        productoDto.idProducto(),
-                        productoDto.nombre(),
-                        productoDto.precio(),
-                        1,
-                        productoDto.stock(),
-                        productoDto.precio()
+            if (respuesta) {
+                redirectAttributes.addFlashAttribute(
+                        "message",
+                        "Producto enviado"
                 );
-                listComprar.add(producto);
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "error",
+                        "Fallo en el proceso de envio"
+                );
             }
 
-            redirectAttributes.addFlashAttribute(
-                    "message",
-                    "Producto enviado"
-            );
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Excepcion: " + e.getMessage()
+            );
         }
 
         return "redirect:/start/home";
     }
 
     @GetMapping("/del-cart/{id}")
-    public String quitar(@PathVariable("id") Integer idProduct) {
-        listComprar.removeIf(product -> product.idProducto().equals(idProduct));
+    public String quitar(
+            @PathVariable("id") Integer idProduct,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Boolean resultado = maintenanceCompra.removerCarrito(idProduct);
+
+            if (resultado) {
+                redirectAttributes.addFlashAttribute(
+                        "message",
+                        "Producto eliminado del carrito"
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "error",
+                        "Producto no removido por alguna inconsistencia"
+                );
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Excepción: " + e.getMessage()
+            );
+        }
+
         return "redirect:/start/car-to-shop";
     }
 
@@ -166,25 +179,17 @@ public class ProductoTController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
-            String username = userDetails.getUsername();
-
-            UsuarioDto usuario = maintenanceUsuario.usuario(username);
-
-            if (usuario == null) {
-                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado: " + username);
+            Integer id = maintenanceUsuario.idUsuario(principal);
+            if (id == -1) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
                 return "redirect:/start/home";
             }
 
-            Integer id = usuario.idUsuario();
-
-            BigDecimal totalCarrito = BigDecimal.ZERO;
-            for (ProductCompleteDto p : listComprar) {
-                totalCarrito = totalCarrito.add(p.totalCoste());
-            }
+            List<ProductCompleteDto> productos = maintenanceCompra.listarCarrito();
+            BigDecimal totalCarrito = maintenanceCompra.totalCarrito();
 
             model.addAttribute("idUsuario", id);
-            model.addAttribute("productoTable", listComprar);
+            model.addAttribute("productoTable", productos);
             model.addAttribute("totalCarrito", totalCarrito);
 
             return "Car";
@@ -197,23 +202,28 @@ public class ProductoTController {
     @GetMapping("/update-cart/{id}")
     public String updateCart(
             @PathVariable Integer id,
-            @RequestParam Integer cantidad
+            @RequestParam Integer cantidad,
+            RedirectAttributes redirectAttributes
     ) {
-        for (ProductCompleteDto p : listComprar) {
-            if (p.idProducto().equals(id)) {
-                listComprar.set(
-                        listComprar.indexOf(p),
-                        new ProductCompleteDto(
-                                p.idProducto(),
-                                p.nombre(),
-                                p.precio(),
-                                cantidad,
-                                p.stock(),
-                                p.precio().multiply(new BigDecimal(cantidad))
-                        )
+        try {
+            Boolean resultado = maintenanceCompra.actualizarCarrito(id, cantidad);
+
+            if (resultado) {
+                redirectAttributes.addFlashAttribute(
+                        "message",
+                        "Producto actualizado en el carrito"
                 );
-                break;
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "error",
+                        "Producto no actualizado por alguna inconsistencia"
+                );
             }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Excepción: " + e.getMessage()
+            );
         }
 
         return "redirect:/start/car-to-shop";
@@ -227,19 +237,15 @@ public class ProductoTController {
     ) {
         try {
             if (idUsuario == null || tarjeta == null || tarjeta.isEmpty()) {
-                return "redirect:/start/car-to-shop?error=InvalidInput";
+                redirectAttributes.addFlashAttribute(
+                        "error",
+                        "ID de Usuario o Tarjeta invalidos."
+                );
+
+                return "redirect:/start/car-to-shop";
             }
 
-            List<CompraDataDto> productsList = listComprar.stream()
-                    .map(prod -> new CompraDataDto(
-                            prod.idProducto(),
-                            prod.cantidad(),
-                            prod.precio()
-                    )).collect(Collectors.toList());
-
-            Integer id = maintenanceCompra.registrarCompra(idUsuario, tarjeta , productsList);
-
-            listComprar.clear();
+            Integer id = maintenanceCompra.registrarCompra(idUsuario, tarjeta);
 
             redirectAttributes.addFlashAttribute(
                     "message",
@@ -247,10 +253,10 @@ public class ProductoTController {
             );
             return "redirect:/start/home";
         } catch (Exception e) {
-            System.out.println("Error en: " + e.getMessage());
-            e.printStackTrace();
-
-            redirectAttributes.addFlashAttribute("message", "Erro en tu compra.");
+            redirectAttributes.addFlashAttribute(
+                    "message",
+                    "Erro en tu compra: " + e.getMessage()
+            );
 
             return "redirect:/start/car-to-shop";
         }
@@ -263,21 +269,16 @@ public class ProductoTController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            UserDetails userDetails = (UserDetails) ((Authentication) principal).getPrincipal();
-            String username = userDetails.getUsername();
-
-            UsuarioDto usuario = maintenanceUsuario.usuario(username);
-
-            if (usuario == null) {
-                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado: " + username);
+            Integer id = maintenanceUsuario.idUsuario(principal);
+            if (id == -1) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
                 return "redirect:/start/home";
             }
-
-            Integer id = usuario.idUsuario();
 
             List<DetalleCompraDto> comprasDetalladas = maintenanceCompra.listarComprasPorCliente(id);
             model.addAttribute("detallesCompra", comprasDetalladas);
             model.addAttribute("error", null);
+
             return "DetalleCompra";
         } catch (Exception e) {
             e.printStackTrace();
