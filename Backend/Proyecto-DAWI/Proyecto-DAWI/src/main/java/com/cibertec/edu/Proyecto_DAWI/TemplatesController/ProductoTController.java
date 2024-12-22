@@ -312,19 +312,31 @@ public class ProductoTController {
     public String update(
             @PathVariable("id") Integer idProduct,
             @RequestParam Boolean estado,
-            Model model
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         try {
             List<ProductoDto> productos = maintenanceProducto.productosPorDisponibilidad(estado);
             ProductoDto productoDto = productos.stream().filter(p -> p.idProducto().equals(idProduct)).findFirst().orElse(null);
 
+            if (productoDto == null) {
+                redirectAttributes.addFlashAttribute(
+                        "error",
+                        "No se encontró el producto a actualizar"
+                );
+                return "redirect:/start/products-all";
+            }
+
             model.addAttribute("producto", productoDto);
             model.addAttribute("error", null);
+            return "Actualizar-Producto";
         } catch (Exception e) {
-            model.addAttribute("error", "Error al traer los datos: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Error al traer los datos: " + e.getMessage()
+            );
+            return "redirect:/start/products-all";
         }
-
-        return "Actualizar-Producto";
     }
 
     @PutMapping("/especification-new")
